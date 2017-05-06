@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+if [ "$2" ]; then
+  PORT="$2"
+else
+  PORT="443"
+fi
+
+echo ""
+
+cert=$(openssl s_client -servername "$1" -connect "$1:$PORT" 2>/dev/null </dev/null)
+alt=$(echo "$cert" | openssl x509 -noout -text | grep -A 1 "X509v3 Subject Alternative Name:" | grep -v "X509v3 Subject Alternative Name:" | xargs)
+
+echo "$cert" | openssl x509 -noout -issuer -subject -dates -fingerprint
+
+if [ "$alt" ]; then
+  echo "$alt"
+fi
+
+echo ""
+echo "$cert" | grep 'Verify' | sed -e 's/^[ \t]*//'
+echo ""

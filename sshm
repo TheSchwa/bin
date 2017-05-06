@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+sshfs "$1":/ /home/laptopdude/mnt/"$1" 

@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+/home/laptopdude/git/sshuttle/sshuttle --dns -r grandline 0/0

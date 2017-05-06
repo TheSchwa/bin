@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+gpg2 --recv-keys $1
+gpg2 --sign-key $1
+gpg2 --send-keys $1

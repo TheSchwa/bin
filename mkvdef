@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+
+all=0
+info=0
+edit=0
+path=`pwd`
+
+while (( "$#" )); do
+    case "$1" in
+        "info"|"i")
+            info=1
+        ;;
+        "edit"|"e")
+            edit=1
+        ;;
+        "all"|"a")
+            all=1
+        ;;
+        "def"|"d")
+            param="def"
+        ;;
+        "file"|"f")
+            param="file"
+            all=0
+        ;;
+        "path"|"p")
+            param="path"
+        ;;
+        *)
+            case "$param" in
+                "def")
+                    def+=("$1")
+                ;;
+                "file")
+                    files+=("$1")
+                ;;
+                "path")
+                    path="$1"
+                ;;
+            esac
+        ;;
+    esac
+    shift
+done
+
+if [ "$info" = "1" ] && [ "$edit" = "1" ]; then
+    echo "Only one of the parameters info or edit may be passed"
+    exit 1
+fi
+
+if [ "$all" = "1" ]; then
+    readarray -t files < <(find "$path" -name "*.mkv" -printf "%f\n")
+fi    
+
+filenum=0
+
+for file in "${files[@]}"; do
+    filenum=$((filenum+1))
+    audiof=0
+    audios=()
+    audiod=()
+    subf=0
+    subs=()
+    subd=()
+    readarray -t lines < <(mediainfo "$path/$file")
+    for line in "${lines[@]}"; do
+        audio=`echo "$line" | grep "^Audio"`
+        sub=`echo "$line" | grep "^Text"`
+        lang=`echo "$line" | grep "^Language "`
+        deff=`echo "$line" | grep "^Default "`
+        defy=`echo "$line" | grep "Yes$"`
+        val=`echo "$line" | sed "s/.*: \(.*\)$/\1/g"`
+        if [ "$audiof" = "1" ]; then
+            if (( "${#lang}" )); then
+                audios+=($val)
+            fi
+            if (( "${#deff}" )); then
+                audiof=0
+                if (( "${#defy}" )); then
+                    audiod+=(1)
+                else
+                    audiod+=(0)
+                fi
+            fi
+        fi
+        if [ "$subf" = "1" ]; then
+            if (( "${#lang}" )); then
+                subs+=($val)
+            fi
+            if (( "${#deff}" )); then
+                subf=0
+                if (( "${#defy}" )); then
+                    subd+=(1)
+                else
+                    subd+=(0)
+                fi
+            fi
+        fi
+        if (( "${#audio}" )); then
+            audiof=1
+        fi
+        if (( "${#sub}" )); then
+            subf=1
+        fi
+    done
+    if [ "$info" = "1" ]; then
+        result="$file - "
+        if (( "${#audios}" )); then
+            for ((i=0;i<${#audios[@]};++i)); do
+                if [ "${audiod[i]}" = "1" ]; then
+                    result+="*"
+                fi
+                j=$((i+1))
+                result+="a$j:${audios[i]} "
+            done
+        fi
+        if (( "${#subs}" )); then
+            for ((i=0;i<${#subs[@]};++i)); do
+                if [ "${subd[i]}" = "1" ]; then
+                    result+="*"
+                fi
+                j=$((i+1))
+                result+="s$j:${subs[i]} "
+            done
+        fi
+        echo "$result"
+    fi
+    
+    if [ "$edit" = 1 ]; then
+        adef=0
+        sdef=0
+        echo "$filenum/${#files[@]} : $file"
+        if (( "${#audiod}" )); then
+            adef=1
+        fi
+        if (( "${#subd}" )); then
+            sdef=1
+        fi
+        if [ "$adef" = "1" ]; then
+            for ((i=0;i<${#audiod[@]};++i)); do
+                if [ "${audiod[$i]}" = "1" ]; then
+                    j=$((i+1))
+                    mkvpropedit "$path/$file" --edit track:"a$j" --set flag-default=0 >/dev/null
+                fi
+            done
+        fi
+        if [ "$sdef" = "1" ]; then
+            for ((i=0;i<${#subd[@]};++i)); do
+                if [ "${subd[$i]}" = "1" ]; then
+                    j=$((i+1))
+                    mkvpropedit "$path/$file" --edit track:"s$j" --set flag-default=0 >/dev/null
+                fi
+            done
+        fi
+        for d in "${def[@]}"; do
+            mkvpropedit "$path/$file" --edit track:"$d" --set flag-default=1 >/dev/null
+        done
+    fi
+done
