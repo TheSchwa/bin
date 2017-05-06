@@ -1,14 +1,32 @@
 #!/usr/bin/env bash
 
+if [ "$1" = "help" ] || [ "$1" = "-h" ]; then
+  echo "ssl HOST [PORT] [STARTTLS] [XMPPHOST]"
+  exit 0
+fi
+
+ARGS=""
 if [ "$2" ]; then
   PORT="$2"
 else
   PORT="443"
 fi
+if [ "$3" ]; then
+  ARGS=" -starttls $3"
+fi
+if [ "$4" ]; then
+  ARGS="$ARGS -xmpphost $4"
+fi
 
 echo ""
 
-cert=$(openssl s_client -servername "$1" -connect "$1:$PORT" 2>/dev/null </dev/null)
+echo "$1"
+dig -x "$1" +short
+dig "$1" +short
+
+echo ""
+
+cert=$(openssl s_client -CApath /etc/ssl/certs -servername "$1" -connect "$1:$PORT" $ARGS 2>/dev/null </dev/null)
 alt=$(echo "$cert" | openssl x509 -noout -text | grep -A 1 "X509v3 Subject Alternative Name:" | grep -v "X509v3 Subject Alternative Name:" | xargs)
 
 echo "$cert" | openssl x509 -noout -issuer -subject -dates -fingerprint
