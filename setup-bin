@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+# set custom terminal prompt
+export PROMPT_COMMAND='PS1="$(python '"$DIR"'/shortpwd.py)"'
+echo -e "\n"'export PROMPT_COMMAND='\''PS1="$(python '"$DIR"'/shortpwd.py)"'\' >> ~/.bashrc
+
+# add this git project to PATH
+echo -e "\n"'export PATH="$PATH:"'"$DIR" >> ~/.bashrc
+export PATH="$PATH:$DIR"
+
