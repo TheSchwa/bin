@@ -11,6 +11,6 @@ else
 fi
 
 echo ""
-echo "<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' to='$2' version='1.0'>" | nc "$1" 5222
+echo "<stream:stream xmlns='jabber:client' xmlns:stream='http://etherx.jabber.org/streams' to='$HOST' version='1.0'>" | nc "$1" 5222
 echo ""
 echo ""
