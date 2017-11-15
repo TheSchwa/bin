@@ -11,7 +11,7 @@ while read -r line; do
   PROC=$(echo "$line" | awk '{print $7}' | sed 's:\(.*\)/\(.*\):\2 (\1):')
   IP=$(echo "$line" | awk '{print $5}' | sed 's/\(.*\):.*/\1/')
   PORT=$(echo "$line" | awk '{print $5}' | sed 's/.*:\(.*\)/\1/')
-  LOCAL=$(echo "$line" | awk '{print $3}' | sed 's/.*:\(.*\)/\1/')
+  LOCAL=$(echo "$line" | awk '{print $4}' | sed 's/.*:\(.*\)/\1/')
 
   echo "$PROC = $IP : $PORT > $LOCAL"
 
