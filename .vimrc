@@ -9,7 +9,7 @@ set list
 set listchars=trail:█,precedes:«,extends:»,tab:¶·
 
 set tabstop=2
-set softtabstop=0
+set softtabstop=2
 set shiftwidth=2
 set expandtab
 set autoindent
