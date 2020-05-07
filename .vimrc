@@ -5,12 +5,12 @@ set number
 set cursorline
 set ruler
 set colorcolumn=80
-
-set autoindent
-set smartindent
-
-set tabstop=2
-set shiftwidth=2
-set expandtab
 set list
 set listchars=trail:█,precedes:«,extends:»,tab:¶·
+
+set tabstop=2
+set softtabstop=0
+set shiftwidth=2
+set expandtab
+set autoindent
+set smartindent
